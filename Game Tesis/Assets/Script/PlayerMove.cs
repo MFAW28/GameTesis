@@ -4,37 +4,43 @@ using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
 {
-    private PlayerMovement playerMovement;
+    private Rigidbody _rb;
+    private Vector3 _input;
 
-    private void Awake()
+    [SerializeField] private float _speed;
+    private void Start()
     {
-        playerMovement = new PlayerMovement();
-    }
-
-    private void OnEnable()
-    {
-        playerMovement.Enable();
-    }
-    private void OnDisable()
-    {
-        playerMovement.Disable();
-    }
-    // Start is called before the first frame update
-    void Start()
-    {
-        
+        _rb = this.GetComponent<Rigidbody>();
     }
 
-    // Update is called once per frame
     private void Update()
     {
-        Vector2 movement = playerMovement.Land.Movement.ReadValue<Vector2>();
-        Debug.Log(movement);
-        //playerMovement.Land.Jump.ReadValue<float>();
-        //if (playerMovement.Land.Jump.ReadValue<float>() == 1)
-        if (playerMovement.Land.Jump.triggered)
+        GatherInput();
+        Look();
+    }
+    private void FixedUpdate()
+    {
+        Move();
+    }
+
+    void GatherInput()
+    {
+        _input = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
+    }
+
+    void Look()
+    {
+        if(_input!= Vector3.zero)
         {
-            Debug.Log("Jump");
+            var relative = (transform.position + _input) - transform.position;
+            var rot = Quaternion.LookRotation(relative, Vector3.up);
+
+            transform.rotation = rot;
         }
+    }
+
+    void Move()
+    {
+        _rb.MovePosition(transform.position + transform.forward * _speed * Time.deltaTime);
     }
 }
